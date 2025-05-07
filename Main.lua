@@ -2,12 +2,19 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
    Name = "Beaks",
-   Icon = 0, -- Icon in Topbar. Can use Lucide Icons (string) or Roblox Image (number). 0 to use no icon (default).
-   LoadingTitle = "Beaks ",
+   Icon = 0,
+   LoadingTitle = "Beaks",
    LoadingSubtitle = "Loading...",
-   Theme = "Default", -- Check https://docs.sirius.menu/rayfield/configuration/themes
+   Theme = "Default"
+})
 
-  local Section = Tab:CreateSection("Section Example")
-    
-  local Tab = Window:CreateTab("🦜Birds🦜", 0)
-    
+local Tab = Window:CreateTab("🦜Birds🦜", 0)
+local Section = Tab:CreateSection("Чит-функции")
+
+-- Кнопка для загрузки скрипта
+local Button = Tab:CreateButton({
+    Name = "Активировать Aim",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sadia4ek/Beaks_Cheat/refs/heads/main/aim.lua"))()
+    end,
+})

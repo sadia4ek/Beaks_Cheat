@@ -1,47 +1,48 @@
 local maxDistance = 400
-
--- Поиск модели Normal по полному пути
-local normalModel = workspace:FindFirstChild("Regions")
-    and workspace.Regions:FindFirstChild("Quill Lake")
-    and workspace.Regions["Quill Lake"]:FindFirstChild("ClientBirds")
-    and workspace.Regions["Quill Lake"].ClientBirds:FindFirstChild("Normal")
-
-if not normalModel then
-    warn("Не найдена модель 'Normal'")
-    return
-end
-
--- Поиск Torso
-local torsoModel = normalModel:FindFirstChild("Torso")
-if not torsoModel then
-    warn("Не найдена модель 'Torso'")
-    return
-end
-
--- Получение всех Primary-партов
-local primaryParts = {}
-for _, part in ipairs(torsoModel:GetDescendants()) do
-    if part:IsA("BasePart") and part.Name == "Primary" then
-        table.insert(primaryParts, part)
-    end
-end
-
--- Нахождение ближайшего из них к камере (в пределах 400 studs)
 local camera = workspace.CurrentCamera
-local closestPart = nil
-local shortestDistance = maxDistance
 
-for _, part in ipairs(primaryParts) do
-    local distance = (camera.CFrame.Position - part.Position).Magnitude
-    if distance < shortestDistance then
-        closestPart = part
-        shortestDistance = distance
+-- Поиск всех моделей "Normal" в Workspace
+local function findAllPrimaryParts()
+    local primaryParts = {}
+
+    for _, normal in ipairs(workspace:GetDescendants()) do
+        if normal:IsA("Model") and normal.Name == "Normal" then
+            local torso = normal:FindFirstChild("Torso")
+            if torso and torso:IsA("Model") then
+                for _, part in ipairs(torso:GetDescendants()) do
+                    if part:IsA("BasePart") and part.Name == "Primary" then
+                        table.insert(primaryParts, part)
+                    end
+                end
+            end
+        end
     end
+
+    return primaryParts
 end
 
--- Если найден подходящий Part — прицелиться
+-- Найдём ближайший Part
+local function getClosestPart(parts)
+    local closest = nil
+    local minDist = maxDistance
+
+    for _, part in ipairs(parts) do
+        local dist = (camera.CFrame.Position - part.Position).Magnitude
+        if dist < minDist then
+            closest = part
+            minDist = dist
+        end
+    end
+
+    return closest
+end
+
+-- Главная логика
+local allPrimaryParts = findAllPrimaryParts()
+local closestPart = getClosestPart(allPrimaryParts)
+
 if closestPart then
     camera.CFrame = CFrame.new(camera.CFrame.Position, closestPart.Position)
 else
-    warn("Нет объектов 'Primary' в радиусе 400 studs.")
+    warn("Нет доступных объектов 'Primary' в радиусе 400 studs.")
 end

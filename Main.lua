@@ -21,58 +21,57 @@ Tab:CreateButton({
     end,
 })
 
--- ESP встроенный
+-- ESP (только в указанных регионах)
 Tab:CreateButton({
-    Name = "ESP (в пределах 1000 studs)",
+    Name = "ESP (1000 studs, по регионам)",
     Callback = function()
-        -- Удаляем старые ESP
-for _, h in ipairs(game.CoreGui:GetChildren()) do
-    if h:IsA("Highlight") and h.Name == "BeaksESP" then
-        h:Destroy()
-    end
-end
+        -- Удаление старых ESP
+        for _, h in ipairs(game.CoreGui:GetChildren()) do
+            if h:IsA("Highlight") and h.Name == "BeaksESP" then
+                h:Destroy()
+            end
+        end
 
-local player = game.Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local root = character:WaitForChild("HumanoidRootPart")
-local maxDistance = 1000
+        local character = player.Character or player.CharacterAdded:Wait()
+        local root = character:WaitForChild("HumanoidRootPart")
+        local maxDistance = 1000
 
--- Подсветка
-local function highlightPart(part)
-    local highlight = Instance.new("Highlight")
-    highlight.Name = "BeaksESP"
-    highlight.Adornee = part
-    highlight.FillColor = Color3.fromRGB(255, 0, 0)
-    highlight.FillTransparency = 0.3
-    highlight.OutlineTransparency = 1
-    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    highlight.Parent = game.CoreGui
-end
+        local function highlightPart(part)
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "BeaksESP"
+            highlight.Adornee = part
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineTransparency = 1
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.Parent = game.CoreGui
+        end
 
--- Пути к регионам
-local regions = {
-    "Quill Lake",
-    "Beakwoods",
-    "DeadLands",
-    "Mount Beaks"
-}
+        -- Список регионов
+        local regions = {
+            "Quill Lake",
+            "Beakwoods",
+            "DeadLands",
+            "Mount Beaks"
+        }
 
-for _, regionName in ipairs(regions) do
-    local success, region = pcall(function()
-        return workspace.Regions[regionName].ClientBirds.Normal.Torso
-    end)
+        for _, regionName in ipairs(regions) do
+            local success, torsoModel = pcall(function()
+                return workspace.Regions[regionName].ClientBirds.Normal.Torso
+            end)
 
-    if success and typeof(region) == "Instance" then
-        for _, part in ipairs(region:GetDescendants()) do
-            if part:IsA("BasePart") and part.Name == "Primary" then
-                local dist = (part.Position - root.Position).Magnitude
-                if dist <= maxDistance then
-                    highlightPart(part)
+            if success and typeof(torsoModel) == "Instance" then
+                for _, part in ipairs(torsoModel:GetDescendants()) do
+                    if part:IsA("BasePart") and part.Name == "Primary" then
+                        local dist = (part.Position - root.Position).Magnitude
+                        if dist <= maxDistance then
+                            highlightPart(part)
+                        end
+                    end
                 end
             end
         end
-    end
-end
+    end,
 })
 
 -- Телепорт-функция
@@ -107,4 +106,17 @@ local locations = {
     ["Mount Beaks"] = {
         85.2576523, 236.609894, 378.349762,
         0.913315773, 2.6972506e-08, -0.407252103,
-        4.999620
+        4.99962027e-09, 1, 7.74427846e-08,
+        0.407252103, -7.27658289e-08, 0.913315773
+    }
+}
+
+-- Кнопки телепорта
+for name, cframeData in pairs(locations) do
+    Tab2:CreateButton({
+        Name = "Teleport to " .. name,
+        Callback = function()
+            teleportTo(cframeData)
+        end,
+    })
+end

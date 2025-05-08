@@ -25,44 +25,54 @@ Tab:CreateButton({
 Tab:CreateButton({
     Name = "ESP (в пределах 1000 studs)",
     Callback = function()
-        -- Удаление старых подсветок
-        for _, h in ipairs(game.CoreGui:GetChildren()) do
-            if h:IsA("Highlight") and h.Name == "BeaksESP" then
-                h:Destroy()
-            end
-        end
+        -- Удаляем старые ESP
+for _, h in ipairs(game.CoreGui:GetChildren()) do
+    if h:IsA("Highlight") and h.Name == "BeaksESP" then
+        h:Destroy()
+    end
+end
 
-        local character = player.Character or player.CharacterAdded:Wait()
-        local root = character:WaitForChild("HumanoidRootPart")
-        local maxDistance = 1000
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local root = character:WaitForChild("HumanoidRootPart")
+local maxDistance = 1000
 
-        local function highlightPart(part)
-            local highlight = Instance.new("Highlight")
-            highlight.Name = "BeaksESP"
-            highlight.Adornee = part
-            highlight.FillColor = Color3.fromRGB(255, 0, 0)
-            highlight.FillTransparency = 0.3
-            highlight.OutlineTransparency = 1
-            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-            highlight.Parent = game.CoreGui
-        end
+-- Подсветка
+local function highlightPart(part)
+    local highlight = Instance.new("Highlight")
+    highlight.Name = "BeaksESP"
+    highlight.Adornee = part
+    highlight.FillColor = Color3.fromRGB(255, 0, 0)
+    highlight.FillTransparency = 0.3
+    highlight.OutlineTransparency = 1
+    highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+    highlight.Parent = game.CoreGui
+end
 
-        for _, normal in ipairs(workspace:GetDescendants()) do
-            if normal:IsA("Model") and normal.Name == "Normal" then
-                local torso = normal:FindFirstChild("Torso")
-                if torso and torso:IsA("Model") then
-                    for _, part in ipairs(torso:GetDescendants()) do
-                        if part:IsA("BasePart") and part.Name == "Primary" then
-                            local distance = (part.Position - root.Position).Magnitude
-                            if distance <= maxDistance then
-                                highlightPart(part)
-                            end
-                        end
-                    end
+-- Пути к регионам
+local regions = {
+    "Quill Lake",
+    "Beakwoods",
+    "DeadLands",
+    "Mount Beaks"
+}
+
+for _, regionName in ipairs(regions) do
+    local success, region = pcall(function()
+        return workspace.Regions[regionName].ClientBirds.Normal.Torso
+    end)
+
+    if success and typeof(region) == "Instance" then
+        for _, part in ipairs(region:GetDescendants()) do
+            if part:IsA("BasePart") and part.Name == "Primary" then
+                local dist = (part.Position - root.Position).Magnitude
+                if dist <= maxDistance then
+                    highlightPart(part)
                 end
             end
         end
-    end,
+    end
+end
 })
 
 -- Телепорт-функция

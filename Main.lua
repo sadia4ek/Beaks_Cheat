@@ -1,5 +1,4 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
 local player = game.Players.LocalPlayer
 
 local Window = Rayfield:CreateWindow({
@@ -14,7 +13,7 @@ local Tab = Window:CreateTab("Birds", 0)
 local Tab2 = Window:CreateTab("Teleport", 0)
 local Section = Tab:CreateSection("Aim")
 
--- Кнопка Aim Bot
+-- Aim Bot
 Tab:CreateButton({
     Name = "Aim Bot",
     Callback = function()
@@ -22,11 +21,47 @@ Tab:CreateButton({
     end,
 })
 
--- Кнопка ESP
+-- ESP встроенный
 Tab:CreateButton({
-    Name = "ESP",
+    Name = "ESP (в пределах 1000 studs)",
     Callback = function()
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/sadia4ek/Beaks_Cheat/refs/heads/main/wh.lua"))()
+        -- Удаление старых подсветок
+        for _, h in ipairs(game.CoreGui:GetChildren()) do
+            if h:IsA("Highlight") and h.Name == "BeaksESP" then
+                h:Destroy()
+            end
+        end
+
+        local character = player.Character or player.CharacterAdded:Wait()
+        local root = character:WaitForChild("HumanoidRootPart")
+        local maxDistance = 1000
+
+        local function highlightPart(part)
+            local highlight = Instance.new("Highlight")
+            highlight.Name = "BeaksESP"
+            highlight.Adornee = part
+            highlight.FillColor = Color3.fromRGB(255, 0, 0)
+            highlight.FillTransparency = 0.3
+            highlight.OutlineTransparency = 1
+            highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            highlight.Parent = game.CoreGui
+        end
+
+        for _, normal in ipairs(workspace:GetDescendants()) do
+            if normal:IsA("Model") and normal.Name == "Normal" then
+                local torso = normal:FindFirstChild("Torso")
+                if torso and torso:IsA("Model") then
+                    for _, part in ipairs(torso:GetDescendants()) do
+                        if part:IsA("BasePart") and part.Name == "Primary" then
+                            local distance = (part.Position - root.Position).Magnitude
+                            if distance <= maxDistance then
+                                highlightPart(part)
+                            end
+                        end
+                    end
+                end
+            end
+        end
     end,
 })
 
@@ -39,7 +74,7 @@ local function teleportTo(cframeData)
     end
 end
 
--- Координаты (позиция + поворот как CFrame)
+-- Координаты
 local locations = {
     ["Quil Lake"] = {
         -67.4444199, 122.165558, -364.498962,
@@ -62,17 +97,4 @@ local locations = {
     ["Mount Beaks"] = {
         85.2576523, 236.609894, 378.349762,
         0.913315773, 2.6972506e-08, -0.407252103,
-        4.99962027e-09, 1, 7.74427846e-08,
-        0.407252103, -7.27658289e-08, 0.913315773
-    }
-}
-
--- Создание кнопок телепорта
-for name, cframeData in pairs(locations) do
-    Tab2:CreateButton({
-        Name = "Teleport to " .. name,
-        Callback = function()
-            teleportTo(cframeData)
-        end,
-    })
-end
+        4.999620

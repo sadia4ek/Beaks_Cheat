@@ -31,6 +31,13 @@ local Button = Tab:CreateButton({
     end,
 })
 
+local Button = Tab:CreateButton({
+    Name = "ESP",
+    Callback = function()
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/sadia4ek/Beaks_Cheat/refs/heads/main/wh.lua"))()
+    end,
+})
+
 local Button = Tab2:CreateButton({
     Name = "Teleport Quil Lake",
     Callback = function()
